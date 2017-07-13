@@ -75,40 +75,39 @@ class Game extends Component {
   }
 
   setInitialState() {
-    this.state.cells[15][14] = 1;
-    this.state.cells[15][15] = 1;
-    this.state.cells[15][16] = 1;
-    this.state.cells[14][16] = 1;
-    this.state.cells[13][15] = 1;
+    this.state.cells[40][14] = 1;
+    this.state.cells[40][15] = 1;
+    this.state.cells[40][16] = 1;
+    this.state.cells[39][16] = 1;
+    this.state.cells[37][15] = 1;
     this.forceUpdate();
   }
 
   handleStartClick() {
-    this.setState({running: true}, () => this.update());
+    // this.setState({running: true}, () => this.update());
+    this.setState({running: true});
+    this.update();
   }
 
   handleResetClick() {
-    cancelAnimationFrame(this.intervalID);
     this.setState({running: false});
     this.clearBoard();
   }
 
   clearBoard() {
     var newState = [...Array(this.state.rows).keys()].map(i => Array(this.state.cols).fill(0))
-    for (var row = 0 ; row < this.state.cols ; row ++ ) {
-      for (var col = 0 ; col < this.state.rows; col ++ ) {
-        newState[row][col] = 0;
-      }
-    };
     this.setState({cells: newState});
   }
 
   checkState(cells, row, col){
     //returns true if the state should switch state
+    var lastRow = this.state.rows - 1;
+    var lastCol = this.state.cols - 1;
+
     var rStart = Math.max(row-1, 0);
     var cStart = Math.max(col-1, 0);
-    var rEnd   = Math.min(row+1, this.state.rows - 1);
-    var cEnd   = Math.min(col+1, this.state.cols - 1);
+    var rEnd   = Math.min(row+1, lastRow);
+    var cEnd   = Math.min(col+1, lastCol);
 
     var sum = 0;
     var currentState = cells[row][col];
@@ -140,27 +139,35 @@ class Game extends Component {
 
   update() {
     // loop over board and update state
+    console.log(this);
+
+    var rows = this.state.rows;
+    var cols = this.state.cols;
+    var cells = this.state.cells;
     var newState = [...Array(this.state.rows).keys()].map(i => Array(this.state.cols).fill(0))
-    var time = new Date().getTime();
-    for (var r=0; r < this.state.rows; r++){
-      for (var c=0; c < this.state.cols; c++){
-        if(this.checkState(this.state.cells, r, c)){
-          newState[r][c] = this.state.cells[r][c] ? 0 : 1;
+
+    for (var r=0; r < rows; r++){
+      for (var c=0; c < cols; c++){
+        if(this.checkState(cells, r, c)){
+          newState[r][c] = cells[r][c] ? 0 : 1;
+        } else {
+          newState[r][c] = cells[r][c];
         }
       }
     }
+
     this.setState({cells: newState});
+    this.forceUpdate();
 
     // wait
     var now = new Date().getTime();
-      var delta = now - time;
-      while (delta < 1000 / 20) {
-        now = new Date().getTime();
-        delta = now - time;
-      }
+    var stop = now + 2000;
+    while (now < stop) {
+      now = new Date().getTime();
+    }
 
     // requestAnimationFrame
-    this.intervalID = requestAnimationFrame(this.update);
+      requestAnimationFrame(this.update());
   }
 
   render () {
